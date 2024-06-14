@@ -326,7 +326,7 @@ def main():
             cpf = input("DIGITE SEU CPF NOVAMENTE (xxx.xxx.xxx-xx): ")
             cpf_filtro = filtrar_cpf(cpf, clientes)
 
-            if contagem_transacoes <= 10:
+            if contagem_transacoes == 10:
                 if cpf_filtro == True:
                     valor_deposito = int(input("DIGITE O VALOR A SER DEPOSITADO: "))
                     deposito = Depósito(valor_deposito, conta)
@@ -346,7 +346,7 @@ def main():
             cpf = input("DIGITE SEU CPF NOVAMENTE (xxx.xxx.xxx-xx): ")
             cpf_filtro = filtrar_cpf(cpf, clientes)
             
-            if contagem_transacoes <= 10:
+            if contagem_transacoes == 10:
                 if cpf_filtro == True:
                     valor_saque = int(input("DIGITE O VALOR A SER SACADO: "))
                     saque = Saque(valor_saque, conta)

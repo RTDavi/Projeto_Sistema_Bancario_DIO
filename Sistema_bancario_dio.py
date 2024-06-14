@@ -1,5 +1,7 @@
 from abc import ABC, abstractclassmethod, abstractmethod, abstractproperty
 
+from datetime import datetime
+
 class Conta:
     
     def __init__(self, numero_conta, cliente):
@@ -124,15 +126,24 @@ class Historico:
     
 
     def adicionar_transacao(self, tipo_transacao, transacao):
-       transacoes = self._transacao_historico
-
-       transacoes.append({
+        transacoes = self._transacao_historico
+        horario = datetime.now().strftime("%d/%m/%Y às %H:%M")
+        transacoes.append({
            "Tipo de Transação": tipo_transacao,
-           "Valor Transação": transacao
-           })
-
-       return transacoes
+           "Valor Transação": transacao,
+           "Data e Horário" : horario})
         
+        print(transacoes)
+        return transacoes
+
+    def transacao_diaria(self, transacao):
+        transacoes_diarias = 0
+        for horario in transacao:
+            if horario["Data e Horário"]["%d"] == datetime.now("%d"):
+                transacoes_diarias += 1
+        return transacoes_diarias
+
+
 
 class Cliente:
     def __init__(self, endereço):
@@ -254,16 +265,18 @@ def ver_extrato(saldo, extrato):
     for deposito in extrato:
         if deposito["Tipo de Transação"] == "Depósito":
             valor_deposito = deposito["Valor Transação"]
+            tempo_deposito = deposito["Data e Horário"]
             deposito_contador += 1
-            print(f"DEPÓSITO {deposito_contador}: R${valor_deposito}")
+            print(f"DEPÓSITO {deposito_contador}: R${valor_deposito} | HORÁRIO: {tempo_deposito}")
         
 
     print("\nSAQUES:")
     for saque in extrato:
         if saque["Tipo de Transação"] == "Saque":
             valor_saque = saque["Valor Transação"]
+            tempo_saque = saque["Data e Horário"]
             saque_contador += 1
-            print(f"SAQUE {saque_contador}: R${valor_saque}")
+            print(f"SAQUE {saque_contador}: R${valor_saque} | HORÁRIO: {tempo_saque}")
 
 
     print(f"\nSALDO ATUAL: R${saldo:.2f}")
@@ -304,38 +317,49 @@ def main():
     clientes = []
     contas = []
     conta = Conta(len(contas), clientes)
+    contagem_transacoes = 0
 
     while True:
         escolha = menu_bancario()
-
+        print(contagem_transacoes)
         if escolha == '1':
             cpf = input("DIGITE SEU CPF NOVAMENTE (xxx.xxx.xxx-xx): ")
             cpf_filtro = filtrar_cpf(cpf, clientes)
 
-            if cpf_filtro == True:
-                valor_deposito = int(input("DIGITE O VALOR A SER DEPOSITADO: "))
-                deposito = Depósito(valor_deposito, conta)
-                deposito.registrar()
+            if contagem_transacoes <= 10:
+                if cpf_filtro == True:
+                    valor_deposito = int(input("DIGITE O VALOR A SER DEPOSITADO: "))
+                    deposito = Depósito(valor_deposito, conta)
+                    deposito.registrar()
+                    contagem_transacoes += 1
 
+                    print(contagem_transacoes)
 
+                else:
+                    print("USUÁRIO NÃO ENCONTRADO, TENTE CRIAR UM USUÁRIO E UMA CONTA PARA PODER SACAR.")
+            
             else:
-                print("USUÁRIO NÃO ENCONTRADO, TENTE CRIAR UM USUÁRIO E UMA CONTA PARA PODER SACAR.")
+                print("TRANSAÇÕES DIÁRIAS EXCEDIDAS")
         
-
 
         if escolha == '2':
             cpf = input("DIGITE SEU CPF NOVAMENTE (xxx.xxx.xxx-xx): ")
             cpf_filtro = filtrar_cpf(cpf, clientes)
+            
+            if contagem_transacoes <= 10:
+                if cpf_filtro == True:
+                    valor_saque = int(input("DIGITE O VALOR A SER SACADO: "))
+                    saque = Saque(valor_saque, conta)
+                    saque.registrar()
+                    contagem_transacoes += 1
 
-            if cpf_filtro == True:
-                valor_saque = int(input("DIGITE O VALOR A SER SACADO: "))
-                saque = Saque(valor_saque, conta)
-                saque.registrar()
+                else:
+                    print("USUÁRIO NÃO ENCONTRADO, TENTE CRIAR UM USUÁRIO E UMA CONTA PARA PODER SACAR.")
 
             else:
-                print("USUÁRIO NÃO ENCONTRADO, TENTE CRIAR UM USUÁRIO E UMA CONTA PARA PODER SACAR.")
+                print("TRANSAÇÕES DIÁRIAS EXCEDIDAS")
+    
 
-        
         if escolha == '3':
            ver_extrato(conta.saldo_valor, conta.historico.transacoes)
 
